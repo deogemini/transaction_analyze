@@ -6,7 +6,15 @@
         <div class="col-md-12">
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>{{ __('Statement Summary: ') }} {{ $statement->file_name }} ({{ $statement->provider }})</span>
+                    <div>
+                        <h5 class="mb-0">{{ $statement->provider }} {{ __('Statement') }}</h5>
+                        <small class="text-muted">
+                            @if($statement->start_date && $statement->end_date)
+                                {{ \Carbon\Carbon::parse($statement->start_date)->format('M d, Y') }} to {{ \Carbon\Carbon::parse($statement->end_date)->format('M d, Y') }}
+                            @endif
+                            ({{ $statement->file_name }})
+                        </small>
+                    </div>
                     <div>
                         <a href="{{ route('statements.export', $statement) }}" class="btn btn-sm btn-success me-2">{{ __('Export CSV') }}</a>
                         <a href="{{ route('statements.index') }}" class="btn btn-sm btn-secondary">{{ __('Back to List') }}</a>
