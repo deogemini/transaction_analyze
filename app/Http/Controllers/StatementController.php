@@ -34,6 +34,8 @@ class StatementController extends Controller
             'statement_file' => 'required|file|mimes:pdf,csv,xlsx,xls|max:10240',
             'provider' => 'required|string',
             'type' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
         $file = $request->file('statement_file');
@@ -45,6 +47,8 @@ class StatementController extends Controller
             'file_path' => $path,
             'provider' => $request->provider,
             'type' => $request->type,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
             'status' => 'pending',
         ]);
 

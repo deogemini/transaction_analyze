@@ -21,7 +21,7 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __('Date') }}</th>
+                                    <th>{{ __('Report Period') }}</th>
                                     <th>{{ __('File Name') }}</th>
                                     <th>{{ __('Provider') }}</th>
                                     <th>{{ __('Status') }}</th>
@@ -34,7 +34,13 @@
                             <tbody>
                                 @forelse ($statements as $statement)
                                     <tr>
-                                        <td>{{ $statement->created_at->format('Y-m-d') }}</td>
+                                        <td>
+                                            @if($statement->start_date && $statement->end_date)
+                                                {{ \Carbon\Carbon::parse($statement->start_date)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($statement->end_date)->format('M d, Y') }}
+                                            @else
+                                                {{ $statement->created_at->format('Y-m-d') }}
+                                            @endif
+                                        </td>
                                         <td>{{ $statement->file_name }}</td>
                                         <td>{{ $statement->provider }}</td>
                                         <td>
