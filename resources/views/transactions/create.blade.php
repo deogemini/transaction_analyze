@@ -87,6 +87,20 @@
                                     </span>
                                 @enderror
                             </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="channel" class="form-label">{{ __('Payment Channel') }}</label>
+                                <select id="channel" class="form-select @error('channel') is-invalid @enderror" name="channel" required>
+                                    <option value="cash">Cash</option>
+                                    <option value="mobile">Mobile Money</option>
+                                    <option value="bank">Bank</option>
+                                </select>
+                                @error('channel')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center mt-4">

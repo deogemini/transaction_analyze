@@ -17,6 +17,7 @@ class Transaction extends Model
         'charge',
         'type',
         'category',
+        'channel',
         'is_charge_row',
     ];
 

@@ -15,10 +15,13 @@
                             <label for="provider" class="form-label">{{ __('Provider') }}</label>
                             <select id="provider" class="form-select @error('provider') is-invalid @enderror" name="provider" required>
                                 <option value="M-Pesa">M-Pesa</option>
+                                <option value="Selcom Pesa">Selcom Pesa</option>
+                                <option value="NBC Bank">NBC Bank</option>
+                                <option value="CRDB Bank">CRDB Bank</option>
+                                <option value="NMB Bank">NMB Bank</option>
+                                <option value="YAS">YAS (Mobile Money)</option>
                                 <option value="Tigo Pesa">Tigo Pesa</option>
                                 <option value="Airtel Money">Airtel Money</option>
-                                <option value="NMB Bank">NMB Bank</option>
-                                <option value="CRDB Bank">CRDB Bank</option>
                             </select>
                             @error('provider')
                                 <span class="invalid-feedback" role="alert">

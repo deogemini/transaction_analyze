@@ -27,6 +27,7 @@ class TransactionController extends Controller
             'description' => 'required|string',
             'type' => 'required|in:credit,debit',
             'category' => 'required|string',
+            'channel' => 'required|in:bank,mobile,cash',
             'charge' => 'nullable|numeric',
         ]);
 
@@ -52,6 +53,7 @@ class TransactionController extends Controller
             'charge' => $request->charge ?? 0,
             'type' => $request->type,
             'category' => $request->category,
+            'channel' => $request->channel,
             'is_charge_row' => false,
         ]);
 
