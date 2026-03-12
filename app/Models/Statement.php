@@ -12,6 +12,8 @@ class Statement extends Model
         'file_path',
         'provider',
         'type',
+        'start_date',
+        'end_date',
         'status',
         'total_debits',
         'total_credits',

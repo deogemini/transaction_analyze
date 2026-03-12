@@ -38,6 +38,8 @@ class StatementParser
                     $this->parseYasPdf($statement, $filePath);
                 } elseif ($statement->provider === 'NMB Bank') {
                     $this->parseNmbPdf($statement, $filePath);
+                } elseif ($statement->provider === 'M-Pesa') {
+                    $this->parseMpesaPdf($statement, $filePath);
                 } else {
                     $this->parsePdf($statement, $filePath);
                 }
@@ -82,6 +84,62 @@ class StatementParser
                     'charge' => $isChargeRow ? $amount : 0,
                     'type' => $type,
                     'category' => $this->categorize($description),
+                    'channel' => 'mobile',
+                    'is_charge_row' => $isChargeRow,
+                ]);
+            }
+        }
+    }
+
+    protected function parseMpesaPdf(Statement $statement, $filePath)
+    {
+        $pdf = $this->pdfParser->parseFile($filePath);
+        $text = $pdf->getText();
+        
+        // Debugging extraction
+        \Log::info("M-Pesa Extraction: " . substr($text, 0, 500));
+        
+        $lines = explode("\n", $text);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line)) continue;
+
+            // Highly specific M-Pesa regex for the 6-column layout
+            // Date Time From To Amount Balance Description
+            // Example: 21-03-2025 01:30PM 255765597134 245151 25,000 71,553.29 Pay Bill to...
+            if (preg_match('/^(\d{1,2}[-\/\.]\d{1,2}[-\/\.]\d{2,4}\s+\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AP]M)?)\s+([^\s]+)\s+([^\s]+)\s+([\d,.]+)\s+([\d,.]+)\s+(.*)$/i', $line, $matches)) {
+                $dateStr = $matches[1];
+                $from = $matches[2];
+                $to = $matches[3];
+                $amountStr = $matches[4];
+                $balanceStr = $matches[5];
+                $description = trim($matches[6]);
+
+                $amount = (float) str_replace(',', '', $amountStr);
+                $balance = (float) str_replace(',', '', $balanceStr);
+                
+                $isChargeRow = $this->isChargeRow($description);
+                $type = $this->determineType($from, $to, $description);
+                $category = $this->categorize($description);
+
+                try {
+                    // Try to parse the date specifically for M-Pesa format (DD-MM-YYYY HH:MM AM/PM)
+                    $date = Carbon::parse(str_replace(['/', '.'], '-', $dateStr));
+                } catch (\Exception $e) {
+                    $date = now();
+                }
+
+                Transaction::create([
+                    'statement_id' => $statement->id,
+                    'transaction_date' => $date,
+                    'from' => $from,
+                    'to' => $to,
+                    'amount' => $amount,
+                    'balance' => $balance,
+                    'description' => $description,
+                    'charge' => $isChargeRow ? $amount : 0,
+                    'type' => $type,
+                    'category' => $category,
                     'channel' => 'mobile',
                     'is_charge_row' => $isChargeRow,
                 ]);
