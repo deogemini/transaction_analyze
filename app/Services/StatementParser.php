@@ -95,10 +95,10 @@ class StatementParser
     {
         $pdf = $this->pdfParser->parseFile($filePath);
         $text = $pdf->getText();
-        
+
         // Debugging extraction
         \Log::info("M-Pesa Extraction: " . substr($text, 0, 500));
-        
+
         $lines = explode("\n", $text);
         foreach ($lines as $line) {
             $line = trim($line);
@@ -117,7 +117,7 @@ class StatementParser
 
                 $amount = (float) str_replace(',', '', $amountStr);
                 $balance = (float) str_replace(',', '', $balanceStr);
-                
+
                 $isChargeRow = $this->isChargeRow($description);
                 $type = $this->determineType($from, $to, $description);
                 $category = $this->categorize($description);
@@ -374,12 +374,12 @@ class StatementParser
     protected function isChargeRow($description)
     {
         $chargeKeywords = [
-            'Transaction Charge', 'M-Pesa Charge', 'Withdrawal Charge',
+            'Transaction Charge', 'M-Pesa Charge', 'Withdrawal Charge', 'Withdraw Charge',
             'Transfer Fee', 'Sms Alert Fee', 'Service Fee',
             'SP Transaction Charge', 'Bank to Wallet Service Charge', 'CHARGES',
             'Debit Arrangement Tax', 'Maintenance Fee', 'Value Added Tax (VAT)',
             'Government Levy', 'ATM Cash WDL On.Us charges',
-            'Monthly Fee', 'FSCH debit', 'GEPG_PAY'
+            'Monthly Fee', 'FSCH debit', 'GEPG_PAY', 'ServiceCharge'
         ];
         foreach ($chargeKeywords as $keyword) {
             if (stripos($description, $keyword) !== false) {
@@ -392,7 +392,7 @@ class StatementParser
     protected function determineType($from, $to, $description)
     {
         // Credits: Deposit, Received, etc.
-        $creditKeywords = ['Deposit', 'Received', 'Money received', 'Reversal'];
+        $creditKeywords = ['Deposit', 'Received', 'Money received', 'Reversal', 'Cash In', 'Disbursement'];
         foreach ($creditKeywords as $keyword) {
             if (stripos($description, $keyword) !== false) {
                 return 'credit';
@@ -404,11 +404,13 @@ class StatementParser
     protected function categorize($description)
     {
         if (stripos($description, 'Pay Bill') !== false || stripos($description, 'Bill Payment') !== false) return 'bill';
-        if (stripos($description, 'Deposit') !== false) return 'deposit';
-        if (stripos($description, 'Withdraw') !== false) return 'withdrawal';
+        if (stripos($description, 'Deposit') !== false || stripos($description, 'Cash In') !== false) return 'deposit';
+        if (stripos($description, 'Withdraw') !== false || stripos($description, 'Cash Out') !== false) return 'withdrawal';
         if (stripos($description, 'Airtime') !== false) return 'airtime';
-        if (stripos($description, 'Buy Goods') !== false || stripos($description, 'Lipa na M-Pesa') !== false) return 'merchant';
+        if (stripos($description, 'Buy Goods') !== false || stripos($description, 'Lipa na M-Pesa') !== false || stripos($description, 'Merchant Payment') !== false) return 'merchant';
         if (stripos($description, 'Send Money') !== false || stripos($description, 'Transfer') !== false) return 'transfer';
+        if (stripos($description, 'Overdraft') !== false || stripos($description, 'SONGESHA') !== false) return 'loan';
+        if (stripos($description, 'Salary') !== false || stripos($description, 'Disbursement') !== false) return 'income';
         if ($this->isChargeRow($description)) return 'charge';
 
         return 'other';
